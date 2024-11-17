@@ -25,23 +25,40 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
+                //パラメータを取得する
                 var argsDic = ArgsType(args);
 
+                //ペースパスの有無を取得する
                 if (!argsDic.TryGetValue("p", out var basePath))
                 {
                     logger.Fatal("Output path is not specified. Please specify with /p.");
                     return;
                 }
 
+                //ベースのパスが存在しない時は落とす
                 if (!Directory.Exists(basePath))
                 {
                     logger.Fatal("Output path does not exist. Please check the path.");
                     return;
                 }
 
-                var outputPath = Path.Combine(basePath, "App_Data", "Parameters", "ExtendedStyles", "HolidayStyle");
+                //全更新するかどうか
+                var allRefresh = argsDic.ContainsKey("a");
+
+                //ベースパスから出力先のパスを取得する
+                var outputPath = Path.Combine(basePath, "App_Data", "Parameters", "ExtendedStyles", "CalendarStyle");
+
+                //出力先が存在しない時は作る
+                if (!Path.Exists(outputPath))
+                {
+                    Directory.CreateDirectory(outputPath);
+                }
+
+                //パラメータ読み取り
+                //ジェネレータのカレンダー設定
                 var paramCalendar = DeserializeFromFile<Parameters.Calendar>(Path.Combine(currentPath, "Parameters", "Calendar.json"));
 
+                //内閣府のサイトより公示された祝日データを取得する
                 using (var request = new HttpRequestMessage(HttpMethod.Get, new Uri(paramCalendar.CalendarUrl)))
                 using (var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
                 {
@@ -57,8 +74,52 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator
                     using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
                     {
                         var records = csv.GetRecords<Calendar>();
+
+                        foreach (var recordsYear in records.GroupBy(record => record.Date.Year))
+                        {
+                            var outputFile = Path.Combine(outputPath, $"CalendarHoliday-{recordsYear.Key}.css");
+
+                            //既に出力済みのファイルがある場合は削除する
+                            if (File.Exists(outputFile))
+                            {
+                                //存在するファイルが過去のものである場合は更新
+                                if (recordsYear.Key < DateTime.Today.Year && !allRefresh)
+                                {
+                                    continue;
+                                }
+
+                                File.Delete(outputFile);
+                                logger.Info($"{Path.GetFileName(outputFile)} Deleted.");
+                            }
+
+                            if (recordsYear.Any())
+                            {
+                                foreach (var record in recordsYear)
+                                {
+                                    File.AppendAllText(
+                                        outputFile,
+                                        @$"#CalendarBody #Grid tbody tr td[data-id=""{record.Date:yyyy/M/d}""]:not(.other-month){{background-color:{paramCalendar.HolidayColor} !important;}}"
+                                        + Environment.NewLine
+                                        + $@"#CalendarBody #Grid tbody tr td[data-id=""{record.Date:yyyy/M/d}""] div .day:after{{content:""{record.Title}"";margin-left:5px;}}"
+                                        + Environment.NewLine
+                                    );
+                                }
+
+                                logger.Info($"{Path.GetFileName(outputFile)} Created.");
+                            }
+                        }
                     }
                 }
+
+                //土日のデータについてはパラメータから基準日を読み出して使う
+                //FirstDayOfWeek/日曜位置/土曜位置
+                //0=日 7/1
+                //1=月 6/7
+                //2=火 5/6
+                //3=水 4/5
+                //4=木 3/4
+                //5=金 2/3
+                //6=土 1/2
             }
             catch (Exception ex)
             {
