@@ -28,25 +28,33 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator
                 //パラメータを取得する
                 var argsDic = ArgsType(args);
 
-                //ペースパスの有無を取得する
-                if (!argsDic.TryGetValue("p", out var basePath))
-                {
-                    logger.Fatal("Output path is not specified. Please specify with /p.");
-                    return;
-                }
-
-                //ベースのパスが存在しない時は落とす
-                if (!Directory.Exists(basePath))
-                {
-                    logger.Fatal("Output path does not exist. Please check the path.");
-                    return;
-                }
-
                 //全更新するかどうか
                 var allRefresh = argsDic.ContainsKey("a");
 
+                //ペースパスの有無を取得する
+                if (!argsDic.TryGetValue("p", out var rootPath))
+                {
+                    rootPath = Path.Combine(currentPath, "..", "Implem.Pleasanter");
+                }
+
+                //ベースのパスが存在しない時は落とす
+                if (!Directory.Exists(rootPath))
+                {
+                    logger.Fatal("Root path does not exist. Please check the path.");
+                    return;
+                }
+
+                var exStylePath = Path.Combine(rootPath, "App_Data", "Parameters", "ExtendedStyles");
+
+                //拡張スタイルのパスが存在しない時は落とす
+                if (!Directory.Exists(rootPath))
+                {
+                    logger.Fatal("ExtendedStyles path does not exist. Please check the path.");
+                    return;
+                }
+
                 //ベースパスから出力先のパスを取得する
-                var outputPath = Path.Combine(basePath, "App_Data", "Parameters", "ExtendedStyles", "CalendarStyle");
+                var outputPath = Path.Combine(rootPath, "CalendarStyle");
 
                 //出力先が存在しない時は作る
                 if (!Path.Exists(outputPath))
@@ -98,7 +106,7 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator
                                 {
                                     File.AppendAllText(
                                         outputFile,
-                                        @$"#CalendarBody #Grid tbody tr td[data-id=""{record.Date:yyyy/M/d}""]:not(.other-month){{background-color:{paramCalendar.HolidayColor} !important;}}"
+                                        @$"#CalendarBody #Grid tbody tr td[data-id=""{record.Date:yyyy/M/d}""]:not(.other-month){{background-color:{paramCalendar.HolidayBackgroundColor} !important;}}"
                                         + Environment.NewLine
                                         + $@"#CalendarBody #Grid tbody tr td[data-id=""{record.Date:yyyy/M/d}""] div .day:after{{content:""{record.Title}"";margin-left:5px;}}"
                                         + Environment.NewLine
@@ -110,16 +118,6 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator
                         }
                     }
                 }
-
-                //土日のデータについてはパラメータから基準日を読み出して使う
-                //FirstDayOfWeek/日曜位置/土曜位置
-                //0=日 7/1
-                //1=月 6/7
-                //2=火 5/6
-                //3=水 4/5
-                //4=木 3/4
-                //5=金 2/3
-                //6=土 1/2
             }
             catch (Exception ex)
             {

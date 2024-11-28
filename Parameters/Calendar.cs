@@ -12,9 +12,12 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator.Parameters
 
         public int FirstDayOfWeek { get; set; } = 1;
 
-        public string SaturdayColor { get; set; } = "#add8e6";
-        public string SundayColor { get; set; } = "#ffc0cb";
-        public string HolidayColor { get; set; } = "#ffc0cb";
+        public string SaturdayBackgroundColor { get; set; } = "#add8e6";
+        public string SaturdayColor { get; set; } = "#000000";
+        public string SundayBackgroundColor { get; set; } = "#ffc0cb";
+        public string SundayColor { get; set; } = "#000000";
+        public string HolidayBackgroundColor { get; set; } = "#ffc0cb";
+        public string HolidayColor { get; set; } = "#000000";
 
     }
 }
