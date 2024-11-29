@@ -1,10 +1,8 @@
 {
   "CalendarUrl": "https://www8.cao.go.jp/chosei/shukujitsu/syukujitsu.csv",
-  "FirstDayOfWeek": 1,
+  "SaturdayIndex": 6,
+  "SundayIndex": 7,
   "SaturdayBackgroundColor": "#add8e6",
-  "SaturdayColor": "#000000",
   "SundayBackgroundColor": "#ffc0cb",
-  "SundayColor": "#000000",
-  "HolidayBackgroundColor": "#ffc0cb",
-  "HolidayColor": "#000000"
+  "HolidayBackgroundColor": "#ffc0cb"
 }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using NLog;
+using System.Drawing;
 using System.Globalization;
 using System.Net;
 using System.Reflection;
@@ -47,14 +48,14 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator
                 var exStylePath = Path.Combine(rootPath, "App_Data", "Parameters", "ExtendedStyles");
 
                 //拡張スタイルのパスが存在しない時は落とす
-                if (!Directory.Exists(rootPath))
+                if (!Directory.Exists(exStylePath))
                 {
                     logger.Fatal("ExtendedStyles path does not exist. Please check the path.");
                     return;
                 }
 
                 //ベースパスから出力先のパスを取得する
-                var outputPath = Path.Combine(rootPath, "CalendarStyle");
+                var outputPath = Path.Combine(exStylePath, "CalendarStyle");
 
                 //出力先が存在しない時は作る
                 if (!Path.Exists(outputPath))
@@ -83,9 +84,10 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator
                     {
                         var records = csv.GetRecords<Calendar>();
 
+                        //祝日
                         foreach (var recordsYear in records.GroupBy(record => record.Date.Year))
                         {
-                            var outputFile = Path.Combine(outputPath, $"CalendarHoliday-{recordsYear.Key}.css");
+                            var outputFile = Path.Combine(outputPath, $"CalendarStyle-Holiday{recordsYear.Key}.css");
 
                             //既に出力済みのファイルがある場合は削除する
                             if (File.Exists(outputFile))
@@ -115,6 +117,28 @@ namespace VehicleVision.PleasanetrTools.HolidayStyleGenerator
 
                                 logger.Info($"{Path.GetFileName(outputFile)} Created.");
                             }
+                        }
+
+                        //週末
+                        {
+                            var outputFile = Path.Combine(outputPath, $"CalendarStyle-Weekend.css");
+
+                            //既に出力済みのファイルがある場合は削除する
+                            if (File.Exists(outputFile))
+                            {
+                                File.Delete(outputFile);
+                                logger.Info($"{Path.GetFileName(outputFile)} Deleted.");
+                            }
+
+                            File.AppendAllText(
+                            outputFile,
+                                @$"#CalendarBody #Grid tbody tr td:nth-child({paramCalendar.SaturdayIndex}):not(.other-month){{background-color:{paramCalendar.SaturdayBackgroundColor};}}"
+                                + Environment.NewLine
+                                + @$"#CalendarBody #Grid tbody tr td:nth-child({paramCalendar.SundayIndex}):not(.other-month){{background-color:{paramCalendar.SundayBackgroundColor};}}"
+                                + Environment.NewLine
+                            );
+
+                            logger.Info($"{Path.GetFileName(outputFile)} Created.");
                         }
                     }
                 }
