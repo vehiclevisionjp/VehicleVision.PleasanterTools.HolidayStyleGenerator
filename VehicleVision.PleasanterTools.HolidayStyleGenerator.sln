@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35506.116 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VehicleVision.PleasanetrTools.HolidayStyleGenerator", "VehicleVision.PleasanetrTools.HolidayStyleGenerator.csproj", "{D1B4EB7A-96FC-4B39-8672-29385FD5A82B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VehicleVision.PleasanterTools.HolidayStyleGenerator", "VehicleVision.PleasanterTools.HolidayStyleGenerator.csproj", "{D1B4EB7A-96FC-4B39-8672-29385FD5A82B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
